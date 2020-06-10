@@ -16,6 +16,7 @@ import com.poha.mygumibus.adapter.MainFragmentAdapter;
 import com.poha.mygumibus.fragment.LocationFragment;
 import com.poha.mygumibus.fragment.MainFragment;
 import com.poha.mygumibus.fragment.SearchFragment;
+import com.poha.mygumibus.util.NonSwipeViewPager;
 
 import java.util.ArrayList;
 
@@ -31,7 +32,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     MainFragmentAdapter fragmentAdapter;
     TabLayout tab;
-    ViewPager viewPager;
+    NonSwipeViewPager viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

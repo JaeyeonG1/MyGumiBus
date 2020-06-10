@@ -8,8 +8,16 @@ import android.view.ViewGroup;
 import androidx.fragment.app.Fragment;
 
 import com.poha.mygumibus.R;
+import com.poha.mygumibus.model.Bus;
+import com.poha.mygumibus.util.XmlParserService;
+
+import java.util.ArrayList;
 
 public class SearchFragment extends Fragment {
+
+    private XmlParserService xmlParserService;
+
+    ArrayList<Bus> buslist;
 
     public SearchFragment() {
         // Required empty public constructor
