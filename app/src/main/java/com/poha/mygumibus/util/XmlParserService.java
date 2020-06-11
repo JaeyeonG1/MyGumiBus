@@ -31,10 +31,15 @@ public class XmlParserService {
     private int eventType;
 
     public ArrayList<Bus> getBusByName(String inputName){
-        String url = ENDPOINT + "BusRouteInfoInqireService"+ "/" + "getRouteNoList" + CERT_KEY + "&routeNo=" + inputName;
+        String url = ENDPOINT + "BusRouteInfoInqireService"+ "/" + "getRouteNoList" + CERT_KEY + "&cityCode=" + CITY_CODE + "&routeNo=" + inputName;
         Log.i("URL", url);
 
         ArrayList<Bus> busList = new ArrayList<>();
+
+        int totalPage = 1;
+        int nowPage = 1;
+        int totalCount = 0;
+        int numOfRows = 0;
 
         String id = null;
         String name = null;
@@ -43,6 +48,107 @@ public class XmlParserService {
         String endNodeName = null;
         int startTime = 0;
         int endTime = 0;
+
+        try {
+            while(totalPage >= nowPage){
+                setUrlNParser(url + "&pageNo=" + nowPage);
+                Log.i("현재 페이지", nowPage + "");
+
+                while (eventType != XmlPullParser.END_DOCUMENT) {
+                    switch (eventType) {
+                        case XmlPullParser.START_DOCUMENT:
+                            break;
+
+                        case XmlPullParser.START_TAG:
+                            tag = parser.getName();
+
+                            if (tag.equals("item")) {
+                            }
+                            else if (tag.equals("routeno")) {
+                                parser.next();
+                                name = parser.getText();
+                                Log.i("노선 번호", parser.getText());
+                            }
+                            else if (tag.equals("routeid")) {
+                                parser.next();
+                                id = parser.getText();
+                                Log.i("노선 ID", parser.getText());
+                            }
+                            else if (tag.equals("routetp")) {
+                                parser.next();
+                                if(parser.getText().equals("일반버스"))
+                                    type = 0;
+                                else if(parser.getText().equals("좌석버스"))
+                                    type = 1;
+                                Log.i("노선 타입", parser.getText());
+                            }
+                            else if (tag.equals("startnodenm")) {
+                                parser.next();
+                                startNodeName = parser.getText();
+                                Log.i("출발지",parser.getText());
+                            }
+                            else if (tag.equals("endnodenm")) {
+                                parser.next();
+                                endNodeName = parser.getText();
+                                Log.i("도착지",parser.getText());
+                            }
+                            else if (tag.equals("startvehicletime")) {
+                                parser.next();
+                                startTime = Integer.parseInt(parser.getText());
+                                Log.i("첫차 시간",parser.getText());
+                            }
+                            else if (tag.equals("endvehicletime")) {
+                                parser.next();
+                                endTime = Integer.parseInt(parser.getText());
+                                Log.i("막차 시간",parser.getText());
+                            }
+
+                            else if (tag.equals("numOfRows")) {
+                                parser.next();
+                                numOfRows = Integer.parseInt(parser.getText());
+                            }
+                            else if (tag.equals("totalCount")) {
+                                parser.next();
+                                totalCount = Integer.parseInt(parser.getText());
+                                Log.i("총 개수", parser.getText());
+                                totalPage = totalCount / numOfRows + 1;
+                                Log.i("페이지 수", totalPage+"");
+                            }
+                            break;
+
+                        case XmlPullParser.TEXT:
+                            break;
+
+                        case XmlPullParser.END_TAG:
+                            tag = parser.getName();
+                            if (tag.equals("item")){
+                                Bus temp = new Bus(id, name, type, startNodeName, endNodeName, startTime, endTime);
+                                busList.add(temp); // 첫번째 검색 결과 종료.. 줄바꿈
+                            }
+                            break;
+                    }
+
+                    eventType = parser.next();
+                }
+                nowPage++;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return busList;
+    }
+
+    public ArrayList<Station> getStationsByName(String inputName){
+        String url = ENDPOINT + "BusSttnInfoInqireService"+ "/" + "getSttnNoList" + CERT_KEY + "&cityCode=" + CITY_CODE + "&nodeNm=" + inputName;
+        Log.i("URL", url);
+
+        ArrayList<Station> stationList = new ArrayList<>();
+
+        String name = null;
+        String code = null;;
+        double gpsLati = 0;
+        double gpsLong = 0;
 
         try {
             setUrlNParser(url);
@@ -55,45 +161,25 @@ public class XmlParserService {
                     case XmlPullParser.START_TAG:
                         tag = parser.getName();
 
-                        if (tag.equals("item")) {
+                        if (tag.equals("gpslati")) {
+                            parser.next();
+                            gpsLati = Double.parseDouble(parser.getText());
+                            Log.i("추가", parser.getText());
                         }
-                        else if (tag.equals("routeno")) {
+                        else if (tag.equals("gpslong")){
+                            parser.next();
+                            gpsLong = Double.parseDouble(parser.getText());
+                            Log.i("추가", parser.getText());
+                        }
+                        else if (tag.equals("nodeno")){
+                            parser.next();
+                            code = parser.getText();
+                            Log.i("추가", parser.getText());
+                        }
+                        else if (tag.equals("nodenm")){
                             parser.next();
                             name = parser.getText();
-                            Log.i("노선 번호", parser.getText());
-                        }
-                        else if (tag.equals("routeid")) {
-                            parser.next();
-                            id = parser.getText();
-                            Log.i("노선 ID", parser.getText());
-                        }
-                        else if (tag.equals("routetp")) {
-                            parser.next();
-                            if(parser.getText().equals("일반버스"))
-                                    type = 0;
-                            else if(parser.getText().equals("좌석버스"))
-                                type = 1;
-                            Log.i("노선 타입", parser.getText());
-                        }
-                        else if (tag.equals("startnodenm")) {
-                            parser.next();
-                            startNodeName = parser.getText();
-                            Log.i("출발지",parser.getText());
-                        }
-                        else if (tag.equals("endnodenm")) {
-                            parser.next();
-                            endNodeName = parser.getText();
-                            Log.i("도착지",parser.getText());
-                        }
-                        else if (tag.equals("startvehicletime")) {
-                            parser.next();
-                            startTime = Integer.parseInt(parser.getText());
-                            Log.i("첫차 시간",parser.getText());
-                        }
-                        else if (tag.equals("endvehicletime")) {
-                            parser.next();
-                            endTime = Integer.parseInt(parser.getText());
-                            Log.i("막차 시간",parser.getText());
+                            Log.i("추가", parser.getText());
                         }
                         break;
 
@@ -103,8 +189,8 @@ public class XmlParserService {
                     case XmlPullParser.END_TAG:
                         tag = parser.getName();
                         if (tag.equals("item")){
-                            Bus temp = new Bus(id, name, type, startNodeName, endNodeName, startTime, endTime);
-                            busList.add(temp); // 첫번째 검색 결과 종료.. 줄바꿈
+                            Station temp = new Station(code, name, gpsLati, gpsLong);
+                            stationList.add(temp); // 첫번째 검색 결과 종료.. 줄바꿈
                         }
                         break;
                 }
@@ -115,7 +201,7 @@ public class XmlParserService {
             e.printStackTrace();
         }
 
-        return busList;
+        return stationList;
     }
 
 

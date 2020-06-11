@@ -3,6 +3,8 @@ package com.poha.mygumibus.model;
 public class Bus {
     public static final int TYPE_NORMAL = 0;
     public static final int TYPE_DUAL = 1;
+    public static final String NORMAL = "일반";
+    public static final String DUAL = "좌석";
 
     String id;
     String name;
@@ -40,6 +42,13 @@ public class Bus {
 
     public int getType() {
         return type;
+    }
+
+    public String getTypeString() {
+        if(type == 0)
+            return NORMAL;
+        else
+            return DUAL;
     }
 
     public void setType(int type) {

@@ -1,7 +1,6 @@
 package com.poha.mygumibus.adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,28 +14,28 @@ import com.poha.mygumibus.model.Station;
 
 import java.util.ArrayList;
 
-public class NearStationRecyclerAdapter extends RecyclerView.Adapter<NearStationRecyclerAdapter.NearStationViewHolder>{
+public class StationRecyclerAdapter extends RecyclerView.Adapter<StationRecyclerAdapter.StationViewHolder>{
 
     ArrayList<Station> stationList;
     ArrayList<Double> distanceList;
     OnItemClickListener listener = null;
 
-    public NearStationRecyclerAdapter(ArrayList<Station> stationList, ArrayList<Double> distanceList){
+    public StationRecyclerAdapter(ArrayList<Station> stationList, ArrayList<Double> distanceList){
         this.stationList = stationList;
         stationList.add(new Station("Default", "표시할 정류장이 없습니다.", 0, 0));
         this.distanceList = distanceList;
         distanceList.add(0.0);
     }
 
-    public class NearStationViewHolder extends RecyclerView.ViewHolder{
+    public class StationViewHolder extends RecyclerView.ViewHolder{
         TextView textName;
-        TextView textDistance;
+        TextView textDistanceCode;
 
-        NearStationViewHolder(View itemView){
+        StationViewHolder(View itemView){
             super(itemView);
 
             textName = itemView.findViewById(R.id.textView_name);
-            textDistance = itemView.findViewById(R.id.textView_distance);
+            textDistanceCode = itemView.findViewById(R.id.textView_distanceOrCode);
             //리스너 정의
             itemView.setOnClickListener(new View.OnClickListener(){
                 @Override
@@ -54,20 +53,25 @@ public class NearStationRecyclerAdapter extends RecyclerView.Adapter<NearStation
 
     @NonNull
     @Override
-    public NearStationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public StationViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         Context context = parent.getContext();
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-        View view = inflater.inflate(R.layout.item_near_station, parent, false);
-        NearStationViewHolder vh = new NearStationViewHolder(view);
+        View view = inflater.inflate(R.layout.item_station, parent, false);
+        StationViewHolder vh = new StationViewHolder(view);
 
         return vh;
     }
 
     @Override
-    public void onBindViewHolder(@NonNull NearStationViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull StationViewHolder holder, int position) {
         holder.textName.setText(stationList.get(position).getName());
-        holder.textDistance.setText(String.format("%.1f", distanceList.get(position)) + "m");
+        if(stationList.size() != distanceList.size()){
+            holder.textDistanceCode.setText(stationList.get(position).getCode());
+        }
+        else{
+            holder.textDistanceCode.setText(String.format("%.1f", distanceList.get(position)) + "m");
+        }
     }
 
     @Override

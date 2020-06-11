@@ -6,12 +6,10 @@ import android.content.Intent;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.util.Log;
-import android.util.Xml;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
@@ -21,14 +19,13 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.poha.mygumibus.R;
-import com.poha.mygumibus.adapter.NearStationRecyclerAdapter;
+import com.poha.mygumibus.adapter.StationRecyclerAdapter;
 import com.poha.mygumibus.model.Station;
 import com.poha.mygumibus.util.GpsService;
 import com.poha.mygumibus.util.XmlParserService;
 
 import net.daum.mf.map.api.MapPOIItem;
 import net.daum.mf.map.api.MapPoint;
-import net.daum.mf.map.api.MapPolyline;
 import net.daum.mf.map.api.MapReverseGeoCoder;
 import net.daum.mf.map.api.MapView;
 
@@ -44,7 +41,7 @@ public class LocationFragment extends Fragment implements View.OnClickListener, 
     ArrayList<Double> distanceList;
 
     RecyclerView recyclerView;
-    NearStationRecyclerAdapter adapter;
+    StationRecyclerAdapter adapter;
 
     MapView mapView;
     Button btn;
@@ -69,7 +66,7 @@ public class LocationFragment extends Fragment implements View.OnClickListener, 
         btn = v.findViewById(R.id.button);
         recyclerView = v.findViewById(R.id.recycler_station);
 
-        adapter = new NearStationRecyclerAdapter(nearbyStations, distanceList);
+        adapter = new StationRecyclerAdapter(nearbyStations, distanceList);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         recyclerView.setAdapter(adapter);
         recyclerView.addItemDecoration(new DividerItemDecoration(getContext(), 1));
