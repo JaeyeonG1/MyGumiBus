@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         drawerView = findViewById(R.id.drawer_view);
 
         setSupportActionBar(toolbar);
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true); // 홈 버튼 활성화
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false); // 홈 버튼 활성화
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_menu_24dp); // 아이콘 대체
         getSupportActionBar().setTitle("20151264 최재영");
 
@@ -67,10 +67,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     // Fragment 매칭
     private void setFragments(){
         fragList.add(new SearchFragment());
-        fragList.add(new MainFragment());
         fragList.add(new LocationFragment());
         fragNameList.add("Search");
-        fragNameList.add("Main");
         fragNameList.add("Location");
     }
 

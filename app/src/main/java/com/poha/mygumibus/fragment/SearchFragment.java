@@ -11,21 +11,25 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.poha.mygumibus.R;
-import com.poha.mygumibus.adapter.BusSearchRecyclerAdapter;
+import com.poha.mygumibus.adapter.BusRecyclerAdapter;
 import com.poha.mygumibus.adapter.StationRecyclerAdapter;
+import com.poha.mygumibus.dialog.BusInfoDialogFragment;
+import com.poha.mygumibus.dialog.StationInfoDialogFragment;
+import com.poha.mygumibus.model.ArrivalBus;
 import com.poha.mygumibus.model.Bus;
 import com.poha.mygumibus.model.Station;
 import com.poha.mygumibus.util.XmlParserService;
 
 import java.util.ArrayList;
 
-public class SearchFragment extends Fragment implements View.OnClickListener {
+public class SearchFragment extends Fragment implements View.OnClickListener, BusRecyclerAdapter.OnItemClickListener, StationRecyclerAdapter.OnItemClickListener {
 
     private XmlParserService xmlParserService;
 
@@ -35,7 +39,7 @@ public class SearchFragment extends Fragment implements View.OnClickListener {
     Button searchStation;
 
     RecyclerView busRecycler;
-    BusSearchRecyclerAdapter busAdapter;
+    BusRecyclerAdapter busAdapter;
 
     RecyclerView stationRecycler;
     StationRecyclerAdapter stationAdapter;
@@ -67,9 +71,9 @@ public class SearchFragment extends Fragment implements View.OnClickListener {
         searchStation = view.findViewById(R.id.button_station);
         textViewNoResult = view.findViewById(R.id.textView_noResult);
         busRecycler = view.findViewById(R.id.recycler_bus);
-        stationRecycler = view.findViewById(R.id.recycler_station);
+        stationRecycler = view.findViewById(R.id.recycler);
 
-        busAdapter = new BusSearchRecyclerAdapter(busList);
+        busAdapter = new BusRecyclerAdapter(busList);
         busRecycler.setLayoutManager(new LinearLayoutManager(getActivity()));
         busRecycler.setAdapter(busAdapter);
         busRecycler.addItemDecoration(new DividerItemDecoration(getContext(), 1));
@@ -83,6 +87,8 @@ public class SearchFragment extends Fragment implements View.OnClickListener {
 
         searchBus.setOnClickListener(this);
         searchStation.setOnClickListener(this);
+        busAdapter.setOnItemClickListener(this);
+        stationAdapter.setOnItemClickListener(this);
 
         return view;
     }
@@ -159,5 +165,49 @@ public class SearchFragment extends Fragment implements View.OnClickListener {
         }
         InputMethodManager imm = (InputMethodManager) getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(input.getWindowToken(), 0);
+    }
+
+    @Override
+    public void onBusItemClick(View v, int position) {
+        final Bus bus = busList.get(position);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ArrayList<Station> stations = xmlParserService.getStationsByBus(bus);
+                final ArrayList<Station> finalStations = stations;
+                final ArrayList<Station> busPos = xmlParserService.getLocationOfBus(bus);
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        BusInfoDialogFragment bd = new BusInfoDialogFragment(bus, finalStations, busPos);
+                        bd.setStyle(DialogFragment.STYLE_NO_TITLE, android.R.style.Theme_NoTitleBar_Fullscreen );
+                        bd.show(getFragmentManager(), BusInfoDialogFragment.TAG_BUS_DIALOG);
+                    }
+                });
+            }
+        }).start();
+    }
+
+    @Override
+    public void onStationItemClick(View v, int position) {
+        final Station station = stationList.get(position);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final ArrayList<ArrivalBus> arrivalBusList = xmlParserService.getBusArrivalList(station);
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        StationInfoDialogFragment bd = new StationInfoDialogFragment(station, arrivalBusList);
+                        bd.setStyle(DialogFragment.STYLE_NO_TITLE, android.R.style.Theme_NoTitleBar_Fullscreen );
+                        bd.show(getFragmentManager(), StationInfoDialogFragment.TAG_STATION_DIALOG);
+                    }
+                });
+            }
+        }).start();
     }
 }

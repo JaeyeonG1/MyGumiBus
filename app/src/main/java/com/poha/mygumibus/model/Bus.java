@@ -6,13 +6,13 @@ public class Bus {
     public static final String NORMAL = "일반";
     public static final String DUAL = "좌석";
 
-    String id;
-    String name;
-    int type;
-    String startNodeName;
-    String endNodeName;
-    int startTime;
-    int endTime;
+    private String id;
+    private String name;
+    private int type;
+    private String startNodeName;
+    private String endNodeName;
+    private int startTime;
+    private int endTime;
 
     public Bus(String id, String name, int type, String startNodeName, String endNodeName, int startTime, int endTime) {
         this.id = id;
@@ -45,7 +45,7 @@ public class Bus {
     }
 
     public String getTypeString() {
-        if(type == 0)
+        if(type == TYPE_NORMAL)
             return NORMAL;
         else
             return DUAL;

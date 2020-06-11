@@ -14,12 +14,12 @@ import com.poha.mygumibus.model.Bus;
 
 import java.util.ArrayList;
 
-public class BusSearchRecyclerAdapter extends RecyclerView.Adapter<BusSearchRecyclerAdapter.BusViewHolder> {
+public class BusRecyclerAdapter extends RecyclerView.Adapter<BusRecyclerAdapter.BusViewHolder> {
 
     ArrayList<Bus> busList;
     OnItemClickListener listener = null;
 
-    public BusSearchRecyclerAdapter(ArrayList<Bus> busList) {
+    public BusRecyclerAdapter(ArrayList<Bus> busList) {
         this.busList = busList;
     }
 
@@ -46,7 +46,7 @@ public class BusSearchRecyclerAdapter extends RecyclerView.Adapter<BusSearchRecy
                     int pos = getAdapterPosition();
                     if(pos != RecyclerView.NO_POSITION){
                         if(listener != null){
-                            listener.onItemClick(v, pos);
+                            listener.onBusItemClick(v, pos);
                         }
                     }
                 }
@@ -97,6 +97,6 @@ public class BusSearchRecyclerAdapter extends RecyclerView.Adapter<BusSearchRecy
     }
 
     public interface OnItemClickListener{
-        void onItemClick(View v, int position);
+        void onBusItemClick(View v, int position);
     }
 }

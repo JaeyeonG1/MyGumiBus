@@ -18,13 +18,21 @@ public class StationRecyclerAdapter extends RecyclerView.Adapter<StationRecycler
 
     ArrayList<Station> stationList;
     ArrayList<Double> distanceList;
+    ArrayList<Station> busLocationList;
+
+    boolean isBusChecker;
+
     OnItemClickListener listener = null;
 
     public StationRecyclerAdapter(ArrayList<Station> stationList, ArrayList<Double> distanceList){
         this.stationList = stationList;
-        stationList.add(new Station("Default", "표시할 정류장이 없습니다.", 0, 0));
         this.distanceList = distanceList;
-        distanceList.add(0.0);
+        isBusChecker = false;
+
+        if(stationList.size() == 0){
+            stationList.add(new Station("Default", "표시할 정류장이 없습니다.", 0, 0));
+            distanceList.add(0.0);
+        }
     }
 
     public class StationViewHolder extends RecyclerView.ViewHolder{
@@ -43,7 +51,7 @@ public class StationRecyclerAdapter extends RecyclerView.Adapter<StationRecycler
                     int pos = getAdapterPosition();
                     if(pos != RecyclerView.NO_POSITION){
                         if(listener != null){
-                            listener.onItemClick(v, pos);
+                            listener.onStationItemClick(v, pos);
                         }
                     }
                 }
@@ -67,7 +75,16 @@ public class StationRecyclerAdapter extends RecyclerView.Adapter<StationRecycler
     public void onBindViewHolder(@NonNull StationViewHolder holder, int position) {
         holder.textName.setText(stationList.get(position).getName());
         if(stationList.size() != distanceList.size()){
-            holder.textDistanceCode.setText(stationList.get(position).getCode());
+            if(isBusChecker){
+                for(Station s : busLocationList){
+                    if(s.getCode().equals(stationList.get(position).getCode())){
+                        holder.textDistanceCode.setText("BUS");
+                    }
+                }
+            }
+            else{
+                holder.textDistanceCode.setText(stationList.get(position).getCode());
+            }
         }
         else{
             holder.textDistanceCode.setText(String.format("%.1f", distanceList.get(position)) + "m");
@@ -88,11 +105,18 @@ public class StationRecyclerAdapter extends RecyclerView.Adapter<StationRecycler
         notifyDataSetChanged();
     }
 
+    public void setBusLocation(ArrayList<Station> busLocationList){
+        this.busLocationList = busLocationList;
+        isBusChecker = true;
+
+        notifyDataSetChanged();
+    }
+
     public void setOnItemClickListener(OnItemClickListener listener){
         this.listener = listener;
     }
 
     public interface OnItemClickListener{
-        void onItemClick(View v, int position);
+        void onStationItemClick(View v, int position);
     }
 }

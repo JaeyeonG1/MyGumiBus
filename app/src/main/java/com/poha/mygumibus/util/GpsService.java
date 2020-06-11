@@ -184,12 +184,4 @@ public class GpsService extends Service implements LocationListener {
     public void onProviderDisabled(String s) {
 
     }
-
-    public void stopUsingGPS()
-    {
-        if(locationManager != null)
-        {
-            locationManager.removeUpdates(GpsService.this);
-        }
-    }
 }

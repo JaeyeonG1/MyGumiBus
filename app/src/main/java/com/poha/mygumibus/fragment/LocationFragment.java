@@ -13,6 +13,7 @@ import android.widget.Button;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AlertDialog;
+import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -20,6 +21,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.poha.mygumibus.R;
 import com.poha.mygumibus.adapter.StationRecyclerAdapter;
+import com.poha.mygumibus.dialog.StationInfoDialogFragment;
+import com.poha.mygumibus.model.ArrivalBus;
 import com.poha.mygumibus.model.Station;
 import com.poha.mygumibus.util.GpsService;
 import com.poha.mygumibus.util.XmlParserService;
@@ -31,7 +34,8 @@ import net.daum.mf.map.api.MapView;
 
 import java.util.ArrayList;
 
-public class LocationFragment extends Fragment implements View.OnClickListener, MapView.CurrentLocationEventListener, MapReverseGeoCoder.ReverseGeoCodingResultListener {
+public class LocationFragment extends Fragment implements View.OnClickListener, StationRecyclerAdapter.OnItemClickListener,
+        MapView.POIItemEventListener, MapView.CurrentLocationEventListener, MapReverseGeoCoder.ReverseGeoCodingResultListener {
     private static final int GPS_ENABLE_REQUEST_CODE = 2001;
 
     private XmlParserService xmlParserService;
@@ -64,7 +68,7 @@ public class LocationFragment extends Fragment implements View.OnClickListener, 
 
         mapView = v.findViewById(R.id.map_view);
         btn = v.findViewById(R.id.button);
-        recyclerView = v.findViewById(R.id.recycler_station);
+        recyclerView = v.findViewById(R.id.recycler);
 
         adapter = new StationRecyclerAdapter(nearbyStations, distanceList);
         recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
@@ -81,6 +85,8 @@ public class LocationFragment extends Fragment implements View.OnClickListener, 
         }
 
         mapView.setCurrentLocationEventListener(this);
+        mapView.setPOIItemEventListener(this);
+        adapter.setOnItemClickListener(this);
         btn.setOnClickListener(this);
 
         searchNearbyStations();
@@ -163,6 +169,7 @@ public class LocationFragment extends Fragment implements View.OnClickListener, 
                         @Override
                         public void run() {
                             distanceList = new ArrayList<>();
+                            int counter = 0;
 
                             for(Station s : nearbyStations){
                                 MapPOIItem marker = new MapPOIItem();
@@ -170,6 +177,7 @@ public class LocationFragment extends Fragment implements View.OnClickListener, 
                                 marker.setSelectedMarkerType(MapPOIItem.MarkerType.YellowPin);
                                 marker.setItemName(s.getName());
                                 marker.setMapPoint(MapPoint.mapPointWithGeoCoord(s.getLatitude(), s.getLongitude()));
+                                marker.setTag(counter++);
                                 mapView.addPOIItem(marker);
 
                                 distanceList.add(gpsService.getDistanceByWGS80(lat, lon, s.getLatitude(), s.getLongitude()));
@@ -220,5 +228,65 @@ public class LocationFragment extends Fragment implements View.OnClickListener, 
 
     private void onFinishReverseGeoCoding(String result) {
         Toast.makeText(getContext(), "Reverse Geo-coding : " + result, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onStationItemClick(View v, int position) {
+        final Station station = nearbyStations.get(position);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                final ArrayList<ArrivalBus> arrivalBusList = xmlParserService.getBusArrivalList(station);
+
+                getActivity().runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        StationInfoDialogFragment bd = new StationInfoDialogFragment(station, arrivalBusList);
+                        bd.setStyle(DialogFragment.STYLE_NO_TITLE, android.R.style.Theme_NoTitleBar_Fullscreen );
+                        bd.show(getFragmentManager(), StationInfoDialogFragment.TAG_STATION_DIALOG);
+                    }
+                });
+            }
+        }).start();
+    }
+
+    @Override
+    public void onPOIItemSelected(MapView mapView, MapPOIItem mapPOIItem) {
+        if(mapPOIItem.getMarkerType().equals(MapPOIItem.MarkerType.RedPin)){
+            int position = mapPOIItem.getTag();
+            final Station station = nearbyStations.get(position);
+
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    final ArrayList<ArrivalBus> arrivalBusList = xmlParserService.getBusArrivalList(station);
+
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            StationInfoDialogFragment bd = new StationInfoDialogFragment(station, arrivalBusList);
+                            bd.setStyle(DialogFragment.STYLE_NO_TITLE, android.R.style.Theme_NoTitleBar_Fullscreen );
+                            bd.show(getFragmentManager(), StationInfoDialogFragment.TAG_STATION_DIALOG);
+                        }
+                    });
+                }
+            }).start();
+        }
+    }
+
+    @Override
+    public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem) {
+
+    }
+
+    @Override
+    public void onCalloutBalloonOfPOIItemTouched(MapView mapView, MapPOIItem mapPOIItem, MapPOIItem.CalloutBalloonButtonType calloutBalloonButtonType) {
+
+    }
+
+    @Override
+    public void onDraggablePOIItemMoved(MapView mapView, MapPOIItem mapPOIItem, MapPoint mapPoint) {
+
     }
 }
